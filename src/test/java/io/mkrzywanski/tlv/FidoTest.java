@@ -1,15 +1,17 @@
-package io.mkrzywanski;
+package io.mkrzywanski.tlv;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteOrder;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class fidoTest {
+public class FidoTest {
+
     @Test
-    void test() {
-        String s = """
+    void shouldParseFidoTlvEncodedData() {
+        String uafAssertion = """
                    AT7uAgM-sQALLgkAQUJDRCNBQkNEDi4HAAABAQEAAAEKLiAA9t
                    BzZC64ecgVQBGSQb5QtEIPC8-Vav4HsHLZDflLaugJLiAAZMCPn92yHv1Ip-iCiBb6i4ADq6
                    ZOv569KFQCvYSJfNgNLggAAQAAAAEAAAAMLkEABJsvEtUsVKh7tmYHhJ2FBm3kHU-OCdWiUY
@@ -28,38 +30,39 @@ public class fidoTest {
                 """;
 
         byte[] decode = Base64.getUrlDecoder()
-                .decode(s.replace("\n", "").replace(" ", ""));
+                .decode(uafAssertion.replace("\n", "").replace(" ", ""));
 
-        var TAG_UAFV1_REG_ASSERTION = TagId.fromShort((short) 0x3E01);
-        var TAG_UAFV1_KRD = TagId.fromShort((short) 0x3E03);
-        var TAG_AAID = TagId.fromShort((short) 0x2E0B);
-        var TAG_ASSERTION_INFO = TagId.fromShort((short) 0x2E0E);
-        var TAG_FINAL_CHALLENGE_HASH = TagId.fromShort((short) 0x2E0A);
-        var TAG_KEYID = TagId.fromShort((short) 0x2E09);
-        var TAG_COUNTERS = TagId.fromShort((short) 0x2E0D);
-        var TAG_PUB_KEY = TagId.fromShort((short) 0x2E0C);
-        var TAG_ATTESTATION_BASIC_FULL = TagId.fromShort((short) 0x3E07);
-        var TAG_SIGNATURE = TagId.fromShort((short) 0x2E06);
-        var TAG_ATTESTATION_CERT = TagId.fromShort((short) 0x2E05);
-        var TAG_ATTESTATION_BASIC_SURROGATE = TagId.fromShort((short) 0x3E07);
+        var TAG_UAFV1_REG_ASSERTION = TagId.fromShort((short) 0x3E01, ByteOrder.LITTLE_ENDIAN);
+        var TAG_UAFV1_KRD = TagId.fromShort((short) 0x3E03, ByteOrder.LITTLE_ENDIAN);
+        var TAG_AAID = TagId.fromShort((short) 0x2E0B, ByteOrder.LITTLE_ENDIAN);
+        var TAG_ASSERTION_INFO = TagId.fromShort((short) 0x2E0E, ByteOrder.LITTLE_ENDIAN);
+        var TAG_FINAL_CHALLENGE_HASH = TagId.fromShort((short) 0x2E0A, ByteOrder.LITTLE_ENDIAN);
+        var TAG_KEYID = TagId.fromShort((short) 0x2E09, ByteOrder.LITTLE_ENDIAN);
+        var TAG_COUNTERS = TagId.fromShort((short) 0x2E0D, ByteOrder.LITTLE_ENDIAN);
+        var TAG_PUB_KEY = TagId.fromShort((short) 0x2E0C, ByteOrder.LITTLE_ENDIAN);
+        var TAG_ATTESTATION_BASIC_FULL = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
+        var TAG_SIGNATURE = TagId.fromShort((short) 0x2E06, ByteOrder.LITTLE_ENDIAN);
+        var TAG_ATTESTATION_CERT = TagId.fromShort((short) 0x2E05, ByteOrder.LITTLE_ENDIAN);
+        var TAG_ATTESTATION_BASIC_SURROGATE = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
 
 
         TlvTagRegistry tlvTagRegistryBuilder = TlvTagRegistryBuilder.newInstance()
                 .beginTag(TAG_UAFV1_REG_ASSERTION)
-                    .beginTag(TAG_UAFV1_KRD)
-                        .beginTag(TAG_AAID).endTag()
-                        .beginTag(TAG_ASSERTION_INFO).endTag()
-                        .beginTag(TAG_FINAL_CHALLENGE_HASH).endTag()
-                        .beginTag(TAG_KEYID).endTag().endTag()
-                        .beginTag(TAG_COUNTERS).endTag()
-                        .beginTag(TAG_PUB_KEY).endTag()
-                    .endTag()
+                .beginTag(TAG_UAFV1_KRD)
+                .beginTag(TAG_AAID).endTag()
+                .beginTag(TAG_ASSERTION_INFO).endTag()
+                .beginTag(TAG_FINAL_CHALLENGE_HASH).endTag()
+                .beginTag(TAG_KEYID).endTag().endTag()
+                .beginTag(TAG_COUNTERS).endTag()
+                .beginTag(TAG_PUB_KEY).endTag()
+                .endTag()
                 .endTag()
                 .build();
 //                    .beginTag(TAG_ATTESTATION_BASIC_FULL)
 
         TlvParser tlvParser = TlvParser.Builder.newInstance()
                 .tlvTagsRegistry(tlvTagRegistryBuilder)
+                .withByteOrder(ByteOrder.LITTLE_ENDIAN)
                 .build();
 
         ParsedTags parse = tlvParser.parse(decode);

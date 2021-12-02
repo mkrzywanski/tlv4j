@@ -1,5 +1,8 @@
-package io.mkrzywanski;
+package io.mkrzywanski.tlv;
 
+import io.mkrzywanski.tlv.TagId;
+import io.mkrzywanski.tlv.TlvTagRegistry;
+import io.mkrzywanski.tlv.TlvTagRegistryBuilder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +19,7 @@ class TlvTagRegistryTest {
                 .endTag()
                 .build();
 
-        assertThat(build.getAssocs(id1)).hasSize(2);
+        assertThat(build.getChildTags(id1)).hasSize(2);
 
     }
 }

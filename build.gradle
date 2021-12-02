@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'checkstyle'
 }
 
 group 'io.mkrzywanski'
@@ -10,12 +11,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'
-
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.7.2'
 }
+
+
+task 'checkstyle' dependsOn(checkstyleMain, checkstyleTest)
+tasks.test.dependsOn('checkstyle')
 
 test {
     useJUnitPlatform()

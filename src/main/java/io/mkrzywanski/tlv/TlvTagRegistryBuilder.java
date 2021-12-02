@@ -1,9 +1,8 @@
-package io.mkrzywanski;
+package io.mkrzywanski.tlv;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TlvTagRegistryBuilder {
@@ -14,8 +13,8 @@ public class TlvTagRegistryBuilder {
         return new TlvTagRegistryBuilder();
     }
 
-    public TagBuilder<TlvTagRegistryBuilder> beginTag(TagId aaa) {
-        TagBuilder<TlvTagRegistryBuilder> tagBuilder = new TagBuilder<>(this).tagId(aaa);
+    public TagBuilder<TlvTagRegistryBuilder> beginTag(final TagId tagId) {
+        final TagBuilder<TlvTagRegistryBuilder> tagBuilder = new TagBuilder<>(this).tagId(tagId);
         highLevelTagBuilders.add(tagBuilder);
         return tagBuilder;
     }
@@ -25,8 +24,8 @@ public class TlvTagRegistryBuilder {
     }
 
     public TlvTagRegistry build() {
-        Map<TagId, Set<TagId>> collect = highLevelTagBuilders.stream()
+        final var tagAssociations = highLevelTagBuilders.stream()
                 .flatMap(b -> b.asTags().entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return new TlvTagRegistry(collect);
+        return new TlvTagRegistry(tagAssociations);
     }
 }
