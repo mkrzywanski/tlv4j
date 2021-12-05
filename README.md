@@ -1,1 +1,1 @@
-# tlv4j
+# tlv4j  [![codecov](https://codecov.io/gh/mkrzywanski/tlv4j/branch/main/graph/badge.svg?token=8esCnTx5qg)](https://codecov.io/gh/mkrzywanski/tlv4j)
