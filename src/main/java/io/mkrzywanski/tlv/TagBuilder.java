@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 
-class TagBuilder<T> {
+public class TagBuilder<T> {
 
     private final T previous;
     private final List<TagBuilder<TagBuilder<T>>> next;
@@ -28,19 +28,19 @@ class TagBuilder<T> {
         return this;
     }
 
-    TagBuilder<TagBuilder<T>> beginTag(final TagId tagId) {
+    public TagBuilder<TagBuilder<T>> beginTag(final TagId tagId) {
         final TagBuilder<TagBuilder<T>> nextTagBuilder = new TagBuilder<>(this).tagId(tagId);
         this.next.add(nextTagBuilder);
         return nextTagBuilder;
     }
 
-    T addTag(final TagId tagId) {
+    public T addTag(final TagId tagId) {
         final TagBuilder<TagBuilder<T>> tagBuilder = new TagBuilder<>(this).tagId(tagId);
         this.next.add(tagBuilder);
         return this.previous;
     }
 
-    T endTag() {
+    public T endTag() {
         return this.previous;
     }
 

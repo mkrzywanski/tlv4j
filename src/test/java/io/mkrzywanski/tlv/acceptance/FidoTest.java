@@ -1,5 +1,10 @@
-package io.mkrzywanski.tlv;
+package io.mkrzywanski.tlv.acceptance;
 
+import io.mkrzywanski.tlv.ParsedTags;
+import io.mkrzywanski.tlv.TagId;
+import io.mkrzywanski.tlv.TlvParser;
+import io.mkrzywanski.tlv.TlvTagRegistry;
+import io.mkrzywanski.tlv.TlvTagRegistryBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteOrder;
@@ -10,8 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FidoTest {
 
     @Test
+    @SuppressWarnings("checkstyle:abbreviationaswordinname")
     void shouldParseFidoTlvEncodedData() {
-        String uafAssertion = """
+        final String uafAssertion = """
                    AT7uAgM-sQALLgkAQUJDRCNBQkNEDi4HAAABAQEAAAEKLiAA9t
                    BzZC64ecgVQBGSQb5QtEIPC8-Vav4HsHLZDflLaugJLiAAZMCPn92yHv1Ip-iCiBb6i4ADq6
                    ZOv569KFQCvYSJfNgNLggAAQAAAAEAAAAMLkEABJsvEtUsVKh7tmYHhJ2FBm3kHU-OCdWiUY
@@ -29,27 +35,27 @@ public class FidoTest {
                    3NpYh2GKPjsAim_cSNmQ
                 """;
 
-        byte[] decode = Base64.getUrlDecoder()
+        final byte[] bytes = Base64.getUrlDecoder()
                 .decode(uafAssertion.replace("\n", "").replace(" ", ""));
 
-        var TAG_UAFV1_REG_ASSERTION = TagId.fromShort((short) 0x3E01, ByteOrder.LITTLE_ENDIAN);
-        var TAG_UAFV1_KRD = TagId.fromShort((short) 0x3E03, ByteOrder.LITTLE_ENDIAN);
-        var TAG_AAID = TagId.fromShort((short) 0x2E0B, ByteOrder.LITTLE_ENDIAN);
-        var TAG_ASSERTION_INFO = TagId.fromShort((short) 0x2E0E, ByteOrder.LITTLE_ENDIAN);
-        var TAG_FINAL_CHALLENGE_HASH = TagId.fromShort((short) 0x2E0A, ByteOrder.LITTLE_ENDIAN);
-        var TAG_KEYID = TagId.fromShort((short) 0x2E09, ByteOrder.LITTLE_ENDIAN);
-        var TAG_COUNTERS = TagId.fromShort((short) 0x2E0D, ByteOrder.LITTLE_ENDIAN);
-        var TAG_PUB_KEY = TagId.fromShort((short) 0x2E0C, ByteOrder.LITTLE_ENDIAN);
-        var TAG_ATTESTATION_BASIC_FULL = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
-        var TAG_SIGNATURE = TagId.fromShort((short) 0x2E06, ByteOrder.LITTLE_ENDIAN);
-        var TAG_ATTESTATION_CERT = TagId.fromShort((short) 0x2E05, ByteOrder.LITTLE_ENDIAN);
-        var TAG_ATTESTATION_BASIC_SURROGATE = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_UAFV1_REG_ASSERTION = TagId.fromShort((short) 0x3E01, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_UAFV1_KRD = TagId.fromShort((short) 0x3E03, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_AAID = TagId.fromShort((short) 0x2E0B, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_ASSERTION_INFO = TagId.fromShort((short) 0x2E0E, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_FINAL_CHALLENGE_HASH = TagId.fromShort((short) 0x2E0A, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_KEYID = TagId.fromShort((short) 0x2E09, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_COUNTERS = TagId.fromShort((short) 0x2E0D, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_PUB_KEY = TagId.fromShort((short) 0x2E0C, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_ATTESTATION_BASIC_FULL = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_SIGNATURE = TagId.fromShort((short) 0x2E06, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_ATTESTATION_CERT = TagId.fromShort((short) 0x2E05, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_ATTESTATION_BASIC_SURROGATE = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
 
 
-        TlvTagRegistry tlvTagRegistryBuilder = TlvTagRegistryBuilder.newInstance()
+        final TlvTagRegistry registry = TlvTagRegistryBuilder.newInstance()
                 .beginTag(TAG_UAFV1_REG_ASSERTION)
-                .beginTag(TAG_UAFV1_KRD)
-                .beginTag(TAG_AAID).endTag()
+                    .beginTag(TAG_UAFV1_KRD)
+                        .beginTag(TAG_AAID).endTag()
                 .beginTag(TAG_ASSERTION_INFO).endTag()
                 .beginTag(TAG_FINAL_CHALLENGE_HASH).endTag()
                 .beginTag(TAG_KEYID).endTag().endTag()
@@ -60,16 +66,16 @@ public class FidoTest {
                 .build();
 //                    .beginTag(TAG_ATTESTATION_BASIC_FULL)
 
-        TlvParser tlvParser = TlvParser.Builder.newInstance()
-                .tlvTagsRegistry(tlvTagRegistryBuilder)
+        final TlvParser tlvParser = TlvParser.Builder.newInstance()
+                .tlvTagsRegistry(registry)
                 .withByteOrder(ByteOrder.LITTLE_ENDIAN)
                 .build();
 
-        ParsedTags parse = tlvParser.parse(decode);
+        final ParsedTags tags = tlvParser.parse(bytes);
 
-        String convert = parse.get(TAG_AAID).convert(String::new);
+        final String aaid = tags.get(TAG_AAID).convert(String::new);
 
-        assertThat(convert).isEqualTo("ABCD#ABCD");
+        assertThat(aaid).isEqualTo("ABCD#ABCD");
 
     }
 }

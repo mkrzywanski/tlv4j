@@ -1,6 +1,5 @@
 package io.mkrzywanski.tlv;
 
-import io.mkrzywanski.tlv.TagId;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
