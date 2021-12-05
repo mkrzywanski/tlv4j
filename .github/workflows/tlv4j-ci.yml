@@ -2,7 +2,6 @@ name: tlv4j-ci
 on: [push]
 jobs:
   build:
-    environment: DEFAULT
     runs-on: ubuntu-latest
     steps:
     - name: Checkout project
@@ -17,9 +16,6 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
       working-directory: ./tlv4j
-    # - name: Generate coverage report
-    #   run: ./gradlew codeCoverageReport
-    #   working-directory: ./promotion-notifier-backend
     - name: Upload coverage report
       run: |
         curl -Os https://uploader.codecov.io/latest/linux/codecov
