@@ -23,7 +23,7 @@ public class TagBuilder<T> {
         this(null);
     }
 
-    TagBuilder<T> tagId(final TagId tagId) {
+    public TagBuilder<T> tagId(final TagId tagId) {
         this.tagId = tagId;
         return this;
     }
@@ -34,10 +34,9 @@ public class TagBuilder<T> {
         return nextTagBuilder;
     }
 
-    public T addTag(final TagId tagId) {
-        final TagBuilder<TagBuilder<T>> tagBuilder = new TagBuilder<>(this).tagId(tagId);
-        this.next.add(tagBuilder);
-        return this.previous;
+    public TagBuilder<T> addTag(final TagId tagId) {
+        final TagBuilder<TagBuilder<T>> tagBuilderTagBuilder = beginTag(tagId);
+        return tagBuilderTagBuilder.previous;
     }
 
     public T endTag() {
@@ -48,7 +47,7 @@ public class TagBuilder<T> {
 
         final var childTagsAssociations = next.stream().map(TagBuilder::asTags)
                 .flatMap(tagIdSetMap -> tagIdSetMap.entrySet().stream())
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (tagIds, tagIds2) -> tagIds));
 
         final Set<TagId> thisTagAssociations = next.stream().map(tagBuilderTagBuilder -> tagBuilderTagBuilder.tagId).collect(toSet());
         final var thisTagAssocs = Map.of(this.tagId, thisTagAssociations);

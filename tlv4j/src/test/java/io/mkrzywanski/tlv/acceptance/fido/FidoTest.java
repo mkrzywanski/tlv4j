@@ -1,5 +1,7 @@
-package io.mkrzywanski.tlv.acceptance;
+package io.mkrzywanski.tlv.acceptance.fido;
 
+import io.mkrzywanski.tlv.ParsedTag;
+import io.mkrzywanski.tlv.ParsedTagAssert;
 import io.mkrzywanski.tlv.ParsedTags;
 import io.mkrzywanski.tlv.TagId;
 import io.mkrzywanski.tlv.TlvParser;
@@ -12,7 +14,9 @@ import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FidoTest {
+class FidoTest {
+
+    private static final AssertionInfo EXPECTED_ASSERTION_INFO = new AssertionInfo(256, (short) 1, SignatureAlgAndEncoding.ALG_SIGN_SECP256R1_ECDSA_SHA256_RAW, PublicKeyAlgAndEncoding.ALG_KEY_ECC_X962_RAW);
 
     @Test
     @SuppressWarnings("checkstyle:abbreviationaswordinname")
@@ -49,22 +53,27 @@ public class FidoTest {
         final var TAG_ATTESTATION_BASIC_FULL = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
         final var TAG_SIGNATURE = TagId.fromShort((short) 0x2E06, ByteOrder.LITTLE_ENDIAN);
         final var TAG_ATTESTATION_CERT = TagId.fromShort((short) 0x2E05, ByteOrder.LITTLE_ENDIAN);
-        final var TAG_ATTESTATION_BASIC_SURROGATE = TagId.fromShort((short) 0x3E07, ByteOrder.LITTLE_ENDIAN);
+        final var TAG_ATTESTATION_BASIC_SURROGATE = TagId.fromShort((short) 0x3E08, ByteOrder.LITTLE_ENDIAN);
 
 
         final TlvTagRegistry registry = TlvTagRegistryBuilder.newInstance()
                 .beginTag(TAG_UAFV1_REG_ASSERTION)
                     .beginTag(TAG_UAFV1_KRD)
-                        .beginTag(TAG_AAID).endTag()
-                .beginTag(TAG_ASSERTION_INFO).endTag()
-                .beginTag(TAG_FINAL_CHALLENGE_HASH).endTag()
-                .beginTag(TAG_KEYID).endTag().endTag()
-                .beginTag(TAG_COUNTERS).endTag()
-                .beginTag(TAG_PUB_KEY).endTag()
-                .endTag()
+                        .addTag(TAG_AAID)
+                        .addTag(TAG_ASSERTION_INFO)
+                        .addTag(TAG_FINAL_CHALLENGE_HASH)
+                        .addTag(TAG_KEYID)
+                        .addTag(TAG_COUNTERS)
+                        .addTag(TAG_PUB_KEY)
+                    .endTag()
+                    .beginTag(TAG_ATTESTATION_BASIC_FULL)
+                        .addTag(TAG_SIGNATURE)
+                    .endTag()
+                    .beginTag(TAG_ATTESTATION_BASIC_SURROGATE)
+                        .addTag(TAG_SIGNATURE)
+                    .endTag()
                 .endTag()
                 .build();
-//                    .beginTag(TAG_ATTESTATION_BASIC_FULL)
 
         final TlvParser tlvParser = TlvParser.Builder.newInstance()
                 .tlvTagsRegistry(registry)
@@ -74,8 +83,16 @@ public class FidoTest {
         final ParsedTags tags = tlvParser.parse(bytes);
 
         final String aaid = tags.get(TAG_AAID).convert(String::new);
+        final AssertionInfo assertionInfo = tags.get(TAG_ASSERTION_INFO).convert(AssertionInfo::fromBytes);
+        final Counters counters = tags.get(TAG_COUNTERS).convert(Counters::fromBytes);
 
         assertThat(aaid).isEqualTo("ABCD#ABCD");
-
+        assertThat(assertionInfo).isEqualTo(EXPECTED_ASSERTION_INFO);
+        ParsedTagAssert.assertThat(tags.get(TAG_FINAL_CHALLENGE_HASH)).hasNonEmptyRawValue();
+        ParsedTagAssert.assertThat(tags.get(TAG_KEYID)).hasNonEmptyRawValue();
+        assertThat(counters).isEqualTo(new Counters(1, 1));
+        ParsedTagAssert.assertThat(tags.get(TAG_PUB_KEY)).hasNonEmptyRawValue();
+        final ParsedTag parsedTag = tags.get(TAG_SIGNATURE);
+        System.out.println("done");
     }
 }

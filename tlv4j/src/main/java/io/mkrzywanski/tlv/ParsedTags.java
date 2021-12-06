@@ -11,7 +11,7 @@ public class ParsedTags {
         tags = tagIdParsedTagMap;
     }
 
-    public Optional<ParsedTag> getAsOptional(final TagId tagId) {
+    public Optional<ParsedTag> tryGet(final TagId tagId) {
         return Optional.ofNullable(tags.get(tagId));
     }
 
