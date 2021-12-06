@@ -1,6 +1,5 @@
 package io.mkrzywanski.tlv.acceptance.fido;
 
-import io.mkrzywanski.tlv.ParsedTag;
 import io.mkrzywanski.tlv.ParsedTagAssert;
 import io.mkrzywanski.tlv.ParsedTags;
 import io.mkrzywanski.tlv.TagId;
@@ -92,7 +91,6 @@ class FidoTest {
         ParsedTagAssert.assertThat(tags.get(TAG_KEYID)).hasNonEmptyRawValue();
         assertThat(counters).isEqualTo(new Counters(1, 1));
         ParsedTagAssert.assertThat(tags.get(TAG_PUB_KEY)).hasNonEmptyRawValue();
-        final ParsedTag parsedTag = tags.get(TAG_SIGNATURE);
-        System.out.println("done");
+        ParsedTagAssert.assertThat(tags.get(TAG_SIGNATURE)).hasNonEmptyRawValue();
     }
 }
